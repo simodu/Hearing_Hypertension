@@ -1,0 +1,259 @@
+
+---
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r    setup, include=FALSE}
+
+rm(list = ls())
+library(haven)
+library(ggplot2)
+library(dplyr)
+Long <- read_dta("C:/Users/sdu7/Box Sync/CCHPH/ARIC_Projects/Hearing-Hypertension/Dataset/20181102_long_figure.dta")
+pta_bp <- read_dta(  "C:/Users/sdu7/Box Sync/miscellaneous/Hearing-Hypertension/Dataset/v1_v4_bp_classification_05.dta")
+str(pta_bp)
+knitr::opts_chunk$set(echo = F , warning = F, message = F)
+
+pta_bp$group <-
+  factor(x = pta_bp$group,
+         levels = 0:2,
+         labels = c("0. Non-hypertensive",
+                    "1. Pre-hypertensive",
+                    "2. Hypertensive"))
+ 
+```
+
+BPTA & Systolic Blood pressure chage  
+
+```{r }
+
+ggplot(data = pta_bp %>%
+         filter(!is.na(group)),
+       aes(y =   bpta ,
+           x =  percent_sbp_change,
+           group = group,
+           color = group ,
+           na.rm = T
+         ))  +
+  geom_point(size=0.6) +  
+  geom_smooth(method = 'loess', se = T) + 
+  theme(legend.position = "bottom") +
+  ggtitle("BPTA & sBP change scatter plot by three baseline groups")
+ 
+```
+
+
+Stratify by three groups
+
+```{r }
+
+ggplot(data = pta_bp %>%          filter(!is.na(group)),
+       aes(y = bpta,
+           x =  percent_sbp_change,
+           group = group,
+           color = factor(group)
+         ))  +
+  geom_point(size= 0.8) +
+  geom_smooth(method = 'loess', se = T) + 
+   facet_wrap(~group, nrow = 2)+
+  ggtitle("BPTA & sBP change scatter plot by three baseline groups")
+ 
+```
+ 
+
+BPTA & Diastolic Blood pressure chage  
+
+
+```{r }
+
+ggplot(data = pta_bp %>%          filter(!is.na(group)),
+       aes(y = bpta,
+           x =  percent_dbp_change,
+           group = group,
+           color = factor(group)
+         ))  +
+  geom_point(size=0.8) +
+  geom_smooth(method = 'loess', se = T) + 
+   ggtitle("BPTA & DBP change scatter plot by three baseline groups")
+  
+```
+
+
+Stratify by three groups
+
+```{r }
+
+ggplot(data = pta_bp %>%
+         filter(!is.na(group)),
+       aes(y = bpta,
+           x =  percent_dbp_change,
+           group = group,
+           color = factor(group)
+         ))  +
+  geom_point(size=0.8) +
+  geom_smooth(method = 'loess', se = T) + 
+   facet_wrap(~group, nrow = 2)+
+  ggtitle("BPTA & DBP change scatter plot by three baseline groups")
+ 
+```
+ 
+
+
+                                       --- previous sessions ------
+
+SBP longitudinal change  
+
+```{r figure1_ plot scatter ponit & mean }
+figure1<- ggplot(data=Long %>%         
+         filter(!is.na(group)), aes(x=vdate,y=sbpv, group= group , color = factor(group))) + 
+  geom_point(size=0.5)  +
+    facet_wrap(~group)  
+      
+figure1
+
+
+
+```
+
+
+```{r ggplot2_sbp _ Add mean for each visit and each group }
+ 
+   long_sum<- Long  %>%
+         filter(!is.na(group)) %>% 
+  group_by(group,visit) %>% 
+  summarise(msbpv = mean(sbpv , na.rm = T))
+ 
+  
+ figure2<- ggplot(data=Long %>%
+         filter(!is.na(group)), aes(x=vdate,y=sbpv, group= group , color = factor(group))) + 
+  geom_point(size=0.5)   
+   
+ figure2
+ 
+ 
+```
+ 
+ 
+ 
+```{r geonline }
+   long_sum<- Long %>% 
+  group_by(group,visit) %>% 
+  summarise(msbpv = mean(sbpv , na.rm = T))
+ 
+  
+ figure3<- ggplot(data=long_sum %>%
+         filter(!is.na(group)), aes(x=visit,y= msbpv, group= group , color = factor(group))) + 
+  geom_point(size=0.5)  +
+      geom_line(data = long_sum %>%
+         filter(!is.na(group)), aes(x=visit,y=msbpv))  
+
+ 
+ figure3
+ 
+ 
+```
+ 
+ 
+DBP longitudinal change  
+ 
+ 
+```{r figure1_dbp  }
+figure1<- ggplot(data=Long %>%          filter(!is.na(group)), aes(x=vdate,y=dbpv, group= group , color = factor(group))) + 
+  geom_point(size=0.5)  +
+    facet_wrap(~group)  
+      
+figure1
+
+
+
+```
+
+
+```{r ggplot2_dbp _ Add mean for each visit and each group }
+ 
+   long_sum<- Long %>% 
+  group_by(group,visit) %>% 
+  summarise(msbpv = mean(dbpv , na.rm = T))
+ 
+  
+ figure2<- ggplot(data=Long %>%          filter(!is.na(group)), aes(x=vdate,y=dbpv, group= group , color = factor(group))) + 
+  geom_point(size=0.5)   
+   
+ figure2
+ 
+ 
+```
+ 
+ 
+ 
+```{r   }
+   long_sum<- Long %>% 
+  group_by(group,visit) %>% 
+  summarise(mdbpv = mean(dbpv , na.rm = T))
+ 
+  
+ figure3<- ggplot(data=long_sum, aes(x=visit,y= mdbpv, group= group , color = factor(group))) + 
+  geom_point(size=0.5)  +
+      geom_line(data = long_sum, aes(x=visit,y=mdbpv))  
+
+ 
+ figure3
+ 
+ 
+```
+ 
+ 
+ Pulse longitudinal change  
+ 
+ 
+```{r   }
+figure1<- ggplot(data=Long, aes(x=vdate,y= pulsev, group= group , color = factor(group))) + 
+  geom_point(size=0.5)  +
+    facet_wrap(~group)  
+      
+figure1
+
+
+
+```
+
+
+```{r  }
+ 
+   long_sum<- Long %>% 
+  group_by(group,visit) %>% 
+  summarise(mpulsev = mean(pulsev , na.rm = T))
+ 
+  
+ figure2<- ggplot(data=Long %>%          filter(!is.na(group)), aes(x=vdate,y=pulsev, group= group , color = factor(group))) + 
+  geom_point(size=0.5)   
+   
+ figure2
+ 
+ 
+```
+ 
+ 
+ 
+```{r   }
+   long_sum<- Long %>% 
+  group_by(group,visit) %>% 
+  summarise(mpulsev = mean(pulsev , na.rm = T))
+ 
+  
+ figure3<- ggplot(data=long_sum %>%          
+                    filter(!is.na(group)), 
+                  aes(x=visit,y= mpulsev, group= group , color = factor(group))) + 
+  geom_point(size=0.5)  +
+      geom_line(data = long_sum, aes(x=visit,y=mpulsev))  
+
+ 
+ figure3
+ 
+ 
+```
+ 
+    
